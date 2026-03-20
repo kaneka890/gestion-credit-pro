@@ -15,7 +15,6 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_cors import CORS
 
 import os
 app = Flask(__name__, static_folder='static_flutter', static_url_path='')
