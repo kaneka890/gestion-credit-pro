@@ -98618,7 +98618,7 @@ case 1:return A.N(p.at(-1),r)}})
 return A.P($async$Cy,r)}}
 A.aoN.prototype={}
 A.aK_.prototype={
-$1(a){var s,r=new A.nZ(),q=A.b0i("http://localhost:5000/api/v1",B.Nl,A.aH(["Content-Type","application/json"],t.N,t.z),B.Ns),p=new A.Ri(A.a([B.Km],t.i6))
+$1(a){var s,r=new A.nZ(),q=A.b0i("https://web-production-4975b.up.railway.app/api/v1",B.Nl,A.aH(["Content-Type","application/json"],t.N,t.z),B.Ns),p=new A.Ri(A.a([B.Km],t.i6))
 p.R(p,B.WJ)
 s=new A.adv($,p,$,new A.ahg(51200),!1)
 s.Zk$=q
