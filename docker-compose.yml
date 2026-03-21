@@ -1,0 +1,89 @@
+version: "3.9"
+
+services:
+  # ── Base de données PostgreSQL ──────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: gcp_postgres
+    environment:
+      POSTGRES_DB: gestion_credit_pro
+      POSTGRES_USER: gcp_user
+      POSTGRES_PASSWORD: gcp_password_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # ── MongoDB – Flux de paiements ─────────────────────────────
+  mongodb:
+    image: mongo:7-jammy
+    container_name: gcp_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  # ── Redis – Message Broker / File d'attente ─────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: gcp_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # ── Application Flask ───────────────────────────────────────
+  api:
+    build: .
+    container_name: gcp_api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gcp_user:gcp_password_dev@postgres:5432/gestion_credit_pro
+      MONGODB_URI: mongodb://mongodb:27017/gestion_credit_pro
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+    restart: unless-stopped
+
+  # ── Worker Celery – Tâches asynchrones ─────────────────────
+  worker:
+    build: .
+    container_name: gcp_worker
+    command: celery -A run.celery_app worker --loglevel=info --concurrency=4
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gcp_user:gcp_password_dev@postgres:5432/gestion_credit_pro
+      MONGODB_URI: mongodb://mongodb:27017/gestion_credit_pro
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  # ── Celery Beat – Cron (rappels, retards, flux quotidiens) ──
+  beat:
+    build: .
+    container_name: gcp_beat
+    command: celery -A run.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gcp_user:gcp_password_dev@postgres:5432/gestion_credit_pro
+      MONGODB_URI: mongodb://mongodb:27017/gestion_credit_pro
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:

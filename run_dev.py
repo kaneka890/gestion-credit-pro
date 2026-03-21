@@ -608,9 +608,142 @@ def health():
     return jsonify({'status': 'ok', 'version': '1.0.0-alpha-dev', 'app': 'Gestion Crédit Pro'})
 
 
+# ═══════════════════════════════════════════════════════
+# SMS – RAPPELS AUTOMATIQUES (Twilio)
+# ═══════════════════════════════════════════════════════
+
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN  = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')  # ex: +12345678901
+
+def _envoyer_sms(destinataire: str, message: str) -> dict:
+    """Envoie un SMS via Twilio. Retourne {'ok': True} ou {'ok': False, 'erreur': ...}"""
+    if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER]):
+        return {'ok': False, 'erreur': 'Twilio non configuré (variables manquantes)'}
+    try:
+        from twilio.rest import Client
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        # Normaliser le numéro ivoirien (0XXXXXXXXX → +225XXXXXXXXX)
+        numero = destinataire.strip()
+        if numero.startswith('0') and len(numero) == 10:
+            numero = '+225' + numero[1:]
+        elif not numero.startswith('+'):
+            numero = '+225' + numero
+        msg = client.messages.create(body=message, from_=TWILIO_FROM_NUMBER, to=numero)
+        return {'ok': True, 'sid': msg.sid}
+    except Exception as e:
+        return {'ok': False, 'erreur': str(e)}
+
+
+def _executer_rappels():
+    """Vérifie tous les contrats actifs et envoie les SMS de rappel nécessaires."""
+    with app.app_context():
+        maintenant = datetime.utcnow()
+        contrats = ContratCredit.query.filter(
+            ContratCredit.statut.in_(['ACTIF', 'EN_RETARD'])
+        ).all()
+        envoyes = 0
+        for c in contrats:
+            client = Client_model = db.session.get(Client, c.client_id)
+            if not client:
+                continue
+            jours_restants = (c.date_echeance - maintenant).days
+            tel = client.telephone
+
+            if c.statut == 'ACTIF' and jours_restants == 3:
+                msg = (f"Bonjour {client.nom_complet}, rappel : votre crédit de "
+                       f"{c.montant_restant:.0f} FCFA est dû dans 3 jours "
+                       f"({c.date_echeance.strftime('%d/%m/%Y')}). "
+                       f"Merci de préparer votre remboursement. – Gestion Crédit Pro")
+                resultat = _envoyer_sms(tel, msg)
+                if resultat['ok']:
+                    envoyes += 1
+
+            elif c.statut == 'ACTIF' and jours_restants == 0:
+                msg = (f"Bonjour {client.nom_complet}, votre crédit de "
+                       f"{c.montant_restant:.0f} FCFA arrive à échéance AUJOURD'HUI. "
+                       f"Veuillez effectuer votre remboursement. – Gestion Crédit Pro")
+                resultat = _envoyer_sms(tel, msg)
+                if resultat['ok']:
+                    envoyes += 1
+                # Passer en retard si échéance dépassée
+                if jours_restants < 0:
+                    c.statut = 'EN_RETARD'
+
+            elif c.statut == 'ACTIF' and jours_restants < 0:
+                c.statut = 'EN_RETARD'
+                msg = (f"URGENT – {client.nom_complet}, votre crédit de "
+                       f"{c.montant_restant:.0f} FCFA est EN RETARD de {abs(jours_restants)} jour(s). "
+                       f"Contactez votre commerçant immédiatement. – Gestion Crédit Pro")
+                resultat = _envoyer_sms(tel, msg)
+                if resultat['ok']:
+                    envoyes += 1
+
+            elif c.statut == 'EN_RETARD' and abs(jours_restants) % 7 == 0:
+                # Rappel hebdomadaire pour les retards
+                msg = (f"RAPPEL – {client.nom_complet}, votre crédit de "
+                       f"{c.montant_restant:.0f} FCFA est toujours impayé. "
+                       f"Régularisez au plus vite. – Gestion Crédit Pro")
+                resultat = _envoyer_sms(tel, msg)
+                if resultat['ok']:
+                    envoyes += 1
+
+        db.session.commit()
+        return envoyes
+
+
+# Route manuelle pour déclencher les rappels (test ou cron externe)
+@app.route('/api/v1/rappels/envoyer', methods=['POST'])
+@jwt_required()
+def envoyer_rappels():
+    nb = _executer_rappels()
+    return jsonify({'message': f'{nb} SMS envoyé(s)', 'ok': True})
+
+
+# Route pour tester un SMS unique
+@app.route('/api/v1/rappels/test-sms', methods=['POST'])
+@jwt_required()
+def test_sms():
+    data = request.get_json() or {}
+    telephone = data.get('telephone', '')
+    message = data.get('message', 'Test SMS – Gestion Crédit Pro')
+    if not telephone:
+        return jsonify({'erreur': 'Numéro requis'}), 400
+    resultat = _envoyer_sms(telephone, message)
+    return jsonify(resultat)
+
+
+# Route pour envoyer un rappel SMS à un client par son ID
+@app.route('/api/v1/rappels/client/<client_id>', methods=['POST'])
+@jwt_required()
+def rappel_client(client_id):
+    client = Client.query.get(client_id)
+    if not client:
+        return jsonify({'erreur': 'Client introuvable'}), 404
+    message = (f"Bonjour {client.nom_complet}, ceci est un rappel concernant "
+               f"votre crédit en cours. Merci de contacter votre commerçant "
+               f"pour régulariser votre situation. – Gestion Crédit Pro")
+    resultat = _envoyer_sms(client.telephone, message)
+    return jsonify(resultat)
+
+
+# Planificateur automatique (tourne chaque jour à 8h00)
+def _demarrer_planificateur():
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        scheduler = BackgroundScheduler(timezone='Africa/Abidjan')
+        scheduler.add_job(_executer_rappels, 'cron', hour=8, minute=0, id='rappels_sms')
+        scheduler.start()
+        print('[OK] Planificateur SMS actif – rappels chaque jour a 08h00 (Abidjan)')
+    except Exception as e:
+        print(f'[WARN] Planificateur non demarré : {e}')
+
+
 # Créer les tables au démarrage (gunicorn + __main__)
 with app.app_context():
     db.create_all()
+
+_demarrer_planificateur()
 
 if __name__ == '__main__':
     with app.app_context():

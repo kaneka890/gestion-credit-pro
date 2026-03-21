@@ -80,6 +80,11 @@ class ApiClient {
     return resp.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> envoyerRappelSms(String clientId) async {
+    final resp = await _dio.post('/rappels/client/$clientId');
+    return resp.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> envoyerPushPaiement(
     String contratId, {
     double? montant,
