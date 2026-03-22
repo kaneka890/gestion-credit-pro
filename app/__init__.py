@@ -29,13 +29,23 @@ def create_app(config_class=None):
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    # Init MongoDB
+    # Init MongoDB (optionnel — graceful degradation si URI absente)
     global mongo_client
-    mongo_client = MongoClient(app.config["MONGODB_URI"])
+    mongodb_uri = app.config.get("MONGODB_URI")
+    if mongodb_uri and not mongodb_uri.startswith("mongodb://localhost"):
+        try:
+            mongo_client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=3000)
+        except Exception:
+            mongo_client = None
+    else:
+        mongo_client = None
 
     # Init Redis
     global redis_client
-    redis_client = redis.from_url(app.config["REDIS_URL"], decode_responses=True)
+    try:
+        redis_client = redis.from_url(app.config["REDIS_URL"], decode_responses=True, socket_connect_timeout=3)
+    except Exception:
+        redis_client = None
 
     # Init Celery
     celery_app.conf.update(
