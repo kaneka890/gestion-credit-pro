@@ -612,25 +612,30 @@ def health():
 # SMS – RAPPELS AUTOMATIQUES (Twilio)
 # ═══════════════════════════════════════════════════════
 
-TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
-TWILIO_AUTH_TOKEN  = os.environ.get('TWILIO_AUTH_TOKEN', '')
-TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')  # ex: +12345678901
+AT_USERNAME = os.environ.get('AT_USERNAME', 'sandbox')
+AT_API_KEY  = os.environ.get('AT_API_KEY', '')
 
 def _envoyer_sms(destinataire: str, message: str) -> dict:
-    """Envoie un SMS via Twilio. Retourne {'ok': True} ou {'ok': False, 'erreur': ...}"""
-    if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER]):
-        return {'ok': False, 'erreur': 'Twilio non configuré (variables manquantes)'}
+    """Envoie un SMS via Africa's Talking. Retourne {'ok': True} ou {'ok': False, 'erreur': ...}"""
+    if not AT_API_KEY:
+        return {'ok': False, 'erreur': "Africa's Talking non configuré (AT_API_KEY manquant)"}
     try:
-        from twilio.rest import Client
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        import africastalking
+        africastalking.initialize(AT_USERNAME, AT_API_KEY)
+        sms = africastalking.SMS
         # Normaliser le numéro ivoirien (0XXXXXXXXX → +225XXXXXXXXX)
         numero = destinataire.strip()
         if numero.startswith('0') and len(numero) == 10:
             numero = '+225' + numero[1:]
         elif not numero.startswith('+'):
             numero = '+225' + numero
-        msg = client.messages.create(body=message, from_=TWILIO_FROM_NUMBER, to=numero)
-        return {'ok': True, 'sid': msg.sid}
+        response = sms.send(message, [numero])
+        recipients = response.get('SMSMessageData', {}).get('Recipients', [])
+        if recipients and recipients[0].get('status') == 'Success':
+            return {'ok': True, 'sid': recipients[0].get('messageId', '')}
+        else:
+            erreur = recipients[0].get('status', 'Erreur inconnue') if recipients else 'Pas de réponse'
+            return {'ok': False, 'erreur': erreur}
     except Exception as e:
         return {'ok': False, 'erreur': str(e)}
 
