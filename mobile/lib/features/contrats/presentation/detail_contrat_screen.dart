@@ -502,7 +502,7 @@ class _TransactionCard extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: couleurStatut.withOpacity(0.15),
+            color: couleurStatut.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

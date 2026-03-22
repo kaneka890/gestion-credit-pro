@@ -53,8 +53,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String _messageErreur(String erreur) {
     if (erreur.contains('401')) return 'Numéro ou mot de passe incorrect';
-    if (erreur.contains('connection') || erreur.contains('connexion') || erreur.contains('Connection refused'))
+    if (erreur.contains('connection') || erreur.contains('connexion') || erreur.contains('Connection refused')) {
       return 'Serveur inaccessible – vérifiez que le backend tourne';
+    }
     if (erreur.contains('409')) return 'Ce numéro est déjà utilisé';
     return 'Erreur de connexion – réessayez';
   }

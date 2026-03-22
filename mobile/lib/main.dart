@@ -12,7 +12,6 @@ import 'features/contrats/presentation/detail_contrat_screen.dart';
 import 'features/contrats/presentation/nouveau_contrat_screen.dart';
 import 'features/contrats/presentation/contrats_screen.dart';
 import 'features/scores/presentation/score_screen.dart';
-import 'shared/widgets/statut_badge.dart';
 import 'shared/models/contrat_model.dart';
 
 void main() async {
@@ -225,8 +224,9 @@ class _Field extends StatelessWidget {
     ),
     validator: (v) {
       if (label.contains('*') && (v == null || v.isEmpty)) return 'Requis';
-      if (v != null && v.isNotEmpty && v.length < minLen)
+      if (v != null && v.isNotEmpty && v.length < minLen) {
         return 'Minimum $minLen caractères';
+      }
       return null;
     },
   );
@@ -277,7 +277,7 @@ class _DetailClientScreen extends ConsumerWidget {
                   child: Column(children: [
                     CircleAvatar(
                       radius: 36,
-                      backgroundColor: AppColors.orange.withOpacity(0.2),
+                      backgroundColor: AppColors.orange.withValues(alpha: 0.2),
                       child: Text(client.initiales,
                           style: const TextStyle(
                               color: AppColors.orange,

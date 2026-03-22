@@ -69,7 +69,7 @@ class ClientsScreen extends ConsumerWidget {
       ),
       bottomNavigationBar: NavigationBar(
         backgroundColor: AppColors.fondCarte,
-        indicatorColor: AppColors.orange.withOpacity(0.15),
+        indicatorColor: AppColors.orange.withValues(alpha: 0.15),
         selectedIndex: 1,
         onDestinationSelected: (i) {
           switch (i) {
@@ -105,7 +105,7 @@ class _ClientCard extends StatelessWidget {
     child: ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       leading: CircleAvatar(
-        backgroundColor: AppColors.orange.withOpacity(0.2),
+        backgroundColor: AppColors.orange.withValues(alpha: 0.2),
         child: Text(
           client.initiales,
           style: const TextStyle(
@@ -222,7 +222,7 @@ class _NouveauClientScreenState extends ConsumerState<NouveauClientScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _SectionHeader('Informations personnelles'),
+            const _SectionHeader('Informations personnelles'),
             const SizedBox(height: 12),
             _ChampTexte(
               controller: _nomCtrl,
@@ -248,7 +248,7 @@ class _NouveauClientScreenState extends ConsumerState<NouveauClientScreen> {
             ),
             const SizedBox(height: 24),
 
-            _SectionHeader('Comptes Mobile Money'),
+            const _SectionHeader('Comptes Mobile Money'),
             const SizedBox(height: 12),
             _ChampTexte(
               controller: _waveCtrl,
@@ -272,7 +272,7 @@ class _NouveauClientScreenState extends ConsumerState<NouveauClientScreen> {
             ),
             const SizedBox(height: 24),
 
-            _SectionHeader('Garant (optionnel – booste le score de 15%)'),
+            const _SectionHeader('Garant (optionnel – booste le score de 15%)'),
             const SizedBox(height: 12),
             _ChampTexte(
               controller: _garantNomCtrl,
@@ -314,9 +314,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     decoration: BoxDecoration(
-      color: AppColors.orange.withOpacity(0.1),
+      color: AppColors.orange.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+      border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
     ),
     child: Text(
       titre,
@@ -422,7 +422,7 @@ class _ModifierClientScreenState extends ConsumerState<ModifierClientScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _SectionHeader('Informations personnelles'),
+            const _SectionHeader('Informations personnelles'),
             const SizedBox(height: 12),
             _ChampTexte(controller: _nomCtrl, label: 'Nom complet *', icon: Icons.person,
                 validator: (v) => v == null || v.isEmpty ? 'Requis' : null),
@@ -433,7 +433,7 @@ class _ModifierClientScreenState extends ConsumerState<ModifierClientScreen> {
             const SizedBox(height: 12),
             _ChampTexte(controller: _quartierCtrl, label: 'Quartier', icon: Icons.location_on),
             const SizedBox(height: 24),
-            _SectionHeader('Comptes Mobile Money'),
+            const _SectionHeader('Comptes Mobile Money'),
             const SizedBox(height: 12),
             _ChampTexte(controller: _waveCtrl, label: 'Numéro Wave', icon: Icons.waves, type: TextInputType.phone),
             const SizedBox(height: 12),
@@ -441,7 +441,7 @@ class _ModifierClientScreenState extends ConsumerState<ModifierClientScreen> {
             const SizedBox(height: 12),
             _ChampTexte(controller: _mtnCtrl, label: 'MTN MoMo', icon: Icons.circle_outlined, type: TextInputType.phone),
             const SizedBox(height: 24),
-            _SectionHeader('Garant'),
+            const _SectionHeader('Garant'),
             const SizedBox(height: 12),
             _ChampTexte(controller: _garantNomCtrl, label: 'Nom du garant', icon: Icons.verified_user),
             const SizedBox(height: 12),
@@ -518,7 +518,7 @@ class _EtatVide extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.people_outline, size: 80,
-            color: AppColors.texteSecondaire.withOpacity(0.3)),
+            color: AppColors.texteSecondaire.withValues(alpha: 0.3)),
         const SizedBox(height: 16),
         const Text('Aucun client enregistré',
             style: TextStyle(color: AppColors.texteSecondaire, fontSize: 16)),

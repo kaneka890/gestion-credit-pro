@@ -125,7 +125,7 @@ class DashboardScreen extends ConsumerWidget {
       // ── Barre de navigation ──────────────────────────────
       bottomNavigationBar: NavigationBar(
         backgroundColor: AppColors.fondCarte,
-        indicatorColor: AppColors.orange.withOpacity(0.15),
+        indicatorColor: AppColors.orange.withValues(alpha: 0.15),
         selectedIndex: 0,
         onDestinationSelected: (i) {
           switch (i) {
@@ -171,7 +171,7 @@ class _ContenuDashboard extends StatelessWidget {
     return SliverList(
       delegate: SliverChildListDelegate([
         // ── KPIs ──────────────────────────────────────────
-        _SectionTitre('Vue d\'ensemble'),
+        const _SectionTitre('Vue d\'ensemble'),
         const SizedBox(height: 12),
         Row(children: [
           Expanded(child: _KpiCard(
@@ -208,7 +208,7 @@ class _ContenuDashboard extends StatelessWidget {
 
         // ── Graphique camembert ──────────────────────────
         if (contrats.isNotEmpty) ...[
-          _SectionTitre('Répartition des contrats'),
+          const _SectionTitre('Répartition des contrats'),
           const SizedBox(height: 12),
           _GraphiqueCamembert(actifs: actifs.length, retards: retards.length, soldes: soldes.length),
           const SizedBox(height: 24),
@@ -216,14 +216,14 @@ class _ContenuDashboard extends StatelessWidget {
 
         // ── Alertes retard ───────────────────────────────
         if (retards.isNotEmpty) ...[
-          _SectionTitre('⚠️  Retards de paiement', couleur: AppColors.danger),
+          const _SectionTitre('⚠️  Retards de paiement', couleur: AppColors.danger),
           const SizedBox(height: 12),
           ...retards.take(3).map((c) => _ContratRetardCard(contrat: c)),
           const SizedBox(height: 24),
         ],
 
         // ── Contrats récents ─────────────────────────────
-        _SectionTitre('Contrats récents'),
+        const _SectionTitre('Contrats récents'),
         const SizedBox(height: 12),
         if (contrats.isEmpty)
           _EtatVide()
@@ -276,7 +276,7 @@ class _KpiCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: couleur.withOpacity(0.15),
+              color: couleur.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: couleur, size: 20),
@@ -366,14 +366,14 @@ class _GraphiqueCamembert extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Column(
+          const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Legende('Actifs', AppColors.succes),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _Legende('Retards', AppColors.danger),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _Legende('Soldés', AppColors.info),
             ],
           ),
@@ -478,7 +478,7 @@ class _EtatVide extends StatelessWidget {
           Icon(
             Icons.receipt_long_outlined,
             size: 64,
-            color: AppColors.texteSecondaire.withOpacity(0.4),
+            color: AppColors.texteSecondaire.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           const Text(

@@ -72,7 +72,7 @@ class _ContenuScore extends StatelessWidget {
                   // Avatar client
                   CircleAvatar(
                     radius: 32,
-                    backgroundColor: AppColors.orange.withOpacity(0.2),
+                    backgroundColor: AppColors.orange.withValues(alpha: 0.2),
                     child: Text(
                       client.initiales,
                       style: const TextStyle(
@@ -152,9 +152,9 @@ class _ContenuScore extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: couleur.withOpacity(0.15),
+                      color: couleur.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: couleur.withOpacity(0.4)),
+                      border: Border.all(color: couleur.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       'Risque ${score.niveauRisque}',

@@ -70,7 +70,7 @@ class _ContratsScreenState extends ConsumerState<ContratsScreen>
       ),
       body: TabBarView(
         controller: _tabs,
-        children: [
+        children: const [
           _ListeContrats(statut: null),
           _ListeContrats(statut: 'ACTIF'),
           _ListeContrats(statut: 'EN_RETARD'),
@@ -85,7 +85,7 @@ class _ContratsScreenState extends ConsumerState<ContratsScreen>
       ),
       bottomNavigationBar: NavigationBar(
         backgroundColor: AppColors.fondCarte,
-        indicatorColor: AppColors.orange.withOpacity(0.15),
+        indicatorColor: AppColors.orange.withValues(alpha: 0.15),
         selectedIndex: 2,
         onDestinationSelected: (i) {
           switch (i) {
@@ -128,7 +128,7 @@ class _ListeContrats extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.receipt_long_outlined, size: 60,
-                    color: AppColors.texteSecondaire.withOpacity(0.3)),
+                    color: AppColors.texteSecondaire.withValues(alpha: 0.3)),
                 const SizedBox(height: 12),
                 Text(
                   statut == 'EN_RETARD' ? 'Aucun retard !' : 'Aucun contrat',
@@ -163,7 +163,7 @@ class _ContratCard extends StatelessWidget {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
       side: BorderSide(
-        color: contrat.estEnRetard ? AppColors.danger.withOpacity(0.4) : AppColors.bordure,
+        color: contrat.estEnRetard ? AppColors.danger.withValues(alpha: 0.4) : AppColors.bordure,
         width: contrat.estEnRetard ? 1.5 : 1,
       ),
     ),

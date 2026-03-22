@@ -27,7 +27,6 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
   bool _loading = false;
   Map<String, dynamic>? _resultDecision;
 
-  final _fcfa = NumberFormat('#,###', 'fr_FR');
 
   Future<void> _verifierEligibilite() async {
     if (_clientSelectionne == null || _montantCtrl.text.isEmpty) return;
@@ -106,7 +105,7 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // ── Sélection client ───────────────────────
-            _SectionHeader('Client'),
+            const _SectionHeader('Client'),
             const SizedBox(height: 12),
             _SelecteurClient(
               selectionne: _clientSelectionne,
@@ -120,7 +119,7 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
             const SizedBox(height: 24),
 
             // ── Montant ────────────────────────────────
-            _SectionHeader('Montant du crédit'),
+            const _SectionHeader('Montant du crédit'),
             const SizedBox(height: 12),
             TextFormField(
               controller: _montantCtrl,
@@ -164,7 +163,7 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
             const SizedBox(height: 24),
 
             // ── Opérateur Mobile Money ─────────────────
-            _SectionHeader('Opérateur Mobile Money'),
+            const _SectionHeader('Opérateur Mobile Money'),
             const SizedBox(height: 12),
             _SelecteurOperateur(
               valeur: _operateur,
@@ -173,7 +172,7 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
             const SizedBox(height: 24),
 
             // ── Type de remboursement ──────────────────
-            _SectionHeader('Mode de remboursement'),
+            const _SectionHeader('Mode de remboursement'),
             const SizedBox(height: 12),
             _SelecteurTypeRemboursement(
               valeur: _typeRemboursement,
@@ -196,7 +195,7 @@ class _NouveauContratScreenState extends ConsumerState<NouveauContratScreen> {
             const SizedBox(height: 24),
 
             // ── Date d'échéance ────────────────────────
-            _SectionHeader('Date limite de remboursement'),
+            const _SectionHeader('Date limite de remboursement'),
             const SizedBox(height: 12),
             _SelecteurDate(
               date: _dateEcheance,
@@ -257,7 +256,7 @@ class _SelecteurClient extends ConsumerWidget {
         ),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: AppColors.vert.withOpacity(0.2),
+            backgroundColor: AppColors.vert.withValues(alpha: 0.2),
             child: Text(selectionne!.initiales,
                 style: const TextStyle(color: AppColors.vert, fontWeight: FontWeight.w700)),
           ),
@@ -305,7 +304,7 @@ class _SelecteurClient extends ConsumerWidget {
               itemCount: clients.length,
               itemBuilder: (_, i) => ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.orange.withOpacity(0.2),
+                  backgroundColor: AppColors.orange.withValues(alpha: 0.2),
                   child: Text(clients[i].initiales,
                       style: const TextStyle(color: AppColors.orange)),
                 ),
@@ -343,7 +342,7 @@ class _SelecteurOperateur extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: valeur == op
-                    ? AppColors.orange.withOpacity(0.2)
+                    ? AppColors.orange.withValues(alpha: 0.2)
                     : AppColors.fondInput,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
@@ -387,7 +386,7 @@ class _SelecteurTypeRemboursement extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: valeur == type
-                  ? AppColors.orange.withOpacity(0.1)
+                  ? AppColors.orange.withValues(alpha: 0.1)
                   : AppColors.fondInput,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
@@ -484,8 +483,8 @@ class _CarteDecision extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: autorise
-            ? AppColors.succes.withOpacity(0.1)
-            : AppColors.danger.withOpacity(0.1),
+            ? AppColors.succes.withValues(alpha: 0.1)
+            : AppColors.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: autorise ? AppColors.succes : AppColors.danger,
@@ -543,9 +542,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     decoration: BoxDecoration(
-      color: AppColors.orange.withOpacity(0.1),
+      color: AppColors.orange.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+      border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
     ),
     child: Text(
       titre,

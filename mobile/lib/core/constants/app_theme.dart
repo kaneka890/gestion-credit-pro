@@ -35,7 +35,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: null,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: AppColors.orange,
       secondary: AppColors.vert,
       surface: AppColors.fondCarte,
