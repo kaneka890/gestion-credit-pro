@@ -85,14 +85,27 @@ def create_app(config_class=None):
     @app.route("/<path:path>")
     def servir_flutter(path):
         """Sert l'application Flutter Web depuis static_flutter/."""
+        from flask import make_response, abort
         # Ne pas intercepter les routes API
         if path.startswith("api/"):
-            from flask import abort
             abort(404)
         fichier = os.path.join(flutter_dir, path)
+        # Fichiers statiques normaux
         if path and os.path.isfile(fichier):
+            # Service worker et bootstrap : jamais mis en cache
+            if path in ("flutter_service_worker.js", "flutter_bootstrap.js", "flutter.js"):
+                resp = make_response(send_from_directory(flutter_dir, path))
+                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                resp.headers["Pragma"] = "no-cache"
+                resp.headers["Expires"] = "0"
+                return resp
             return send_from_directory(flutter_dir, path)
-        return send_from_directory(flutter_dir, "index.html")
+        # index.html : jamais mis en cache
+        resp = make_response(send_from_directory(flutter_dir, "index.html"))
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
 
     return app
 
