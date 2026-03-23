@@ -131,6 +131,7 @@ class DashboardScreen extends ConsumerWidget {
           switch (i) {
             case 1: context.go('/clients'); break;
             case 2: context.go('/contrats'); break;
+            case 3: context.go('/paiements'); break;
           }
         },
         destinations: const [
@@ -148,6 +149,11 @@ class DashboardScreen extends ConsumerWidget {
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long, color: AppColors.orange),
             label: 'Contrats',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.payments_outlined),
+            selectedIcon: Icon(Icons.payments, color: AppColors.orange),
+            label: 'Paiements',
           ),
         ],
       ),

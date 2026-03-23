@@ -186,3 +186,81 @@ def _verifier_signature_wave(payload: bytes, signature: str) -> bool:
     secret = current_app.config.get("WAVE_API_KEY", "").encode()
     mac = hmac.new(secret, payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(mac, signature.replace("sha256=", ""))
+
+
+# ============================================================
+# HISTORIQUE GLOBAL – Tous les paiements du commerçant
+# ============================================================
+@paiements_bp.route("/historique", methods=["GET"])
+@jwt_required()
+def historique_paiements():
+    """
+    Retourne tous les paiements reçus pour tous les contrats du commerçant.
+    Chaque transaction est enrichie avec le nom du client.
+    Query params: limite (default 50), operateur (wave/orange/mtn/cash)
+    """
+    commercant_id = get_jwt_identity()
+    limite = min(int(request.args.get("limite", 50)), 200)
+    filtre_operateur = request.args.get("operateur")
+
+    # 1. Récupérer tous les contrats du commerçant (PostgreSQL)
+    contrats = ContratCredit.query.filter_by(commercant_id=commercant_id).all()
+    if not contrats:
+        return jsonify({"transactions": [], "total": 0, "total_montant": 0})
+
+    contrat_map = {str(c.id): c for c in contrats}
+    contrat_ids = list(contrat_map.keys())
+
+    # Pré-charger les clients
+    client_ids = list({str(c.client_id) for c in contrats})
+    clients = {str(cl.id): cl for cl in Client.query.filter(Client.id.in_(client_ids)).all()}
+
+    # 2. Récupérer les flux depuis MongoDB
+    mongo = get_mongo_db()
+    flux_cursor = mongo.flux_paiements.find({"contrat_id": {"$in": contrat_ids}})
+
+    # 3. Aplatir et enrichir les transactions
+    toutes_transactions = []
+    for flux in flux_cursor:
+        cid = flux.get("contrat_id", "")
+        contrat = contrat_map.get(cid)
+        if not contrat:
+            continue
+        client = clients.get(str(contrat.client_id))
+        nom_client = client.nom_complet if client else "Client inconnu"
+        telephone = client.telephone if client else ""
+
+        for tx in flux.get("transactions", []):
+            operateur = tx.get("source", "")
+            if filtre_operateur and operateur != filtre_operateur:
+                continue
+            date_val = tx.get("date")
+            if isinstance(date_val, datetime):
+                date_str = date_val.isoformat()
+            else:
+                date_str = str(date_val) if date_val else ""
+
+            toutes_transactions.append({
+                "date": date_str,
+                "montant": tx.get("montant", 0),
+                "operateur": operateur,
+                "reference": tx.get("reference_api", ""),
+                "statut": tx.get("statut", "VALIDE"),
+                "note": tx.get("note", ""),
+                "contrat_id": cid,
+                "client_nom": nom_client,
+                "client_telephone": telephone,
+                "montant_initial_contrat": float(contrat.montant_initial),
+            })
+
+    # 4. Trier par date décroissante et limiter
+    toutes_transactions.sort(key=lambda t: t["date"], reverse=True)
+    toutes_transactions = toutes_transactions[:limite]
+
+    total_montant = sum(t["montant"] for t in toutes_transactions)
+
+    return jsonify({
+        "transactions": toutes_transactions,
+        "total": len(toutes_transactions),
+        "total_montant": total_montant,
+    })

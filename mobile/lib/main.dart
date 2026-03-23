@@ -12,6 +12,7 @@ import 'features/contrats/presentation/detail_contrat_screen.dart';
 import 'features/contrats/presentation/nouveau_contrat_screen.dart';
 import 'features/contrats/presentation/contrats_screen.dart';
 import 'features/scores/presentation/score_screen.dart';
+import 'features/paiements/presentation/paiements_screen.dart';
 import 'shared/models/contrat_model.dart';
 
 void main() async {
@@ -78,6 +79,7 @@ final _routeur = GoRouter(
       ),
     ),
     GoRoute(path: '/parametres', builder: (_, __) => const _ParametresScreen()),
+    GoRoute(path: '/paiements', builder: (_, __) => const PaiementsScreen()),
   ],
 );
 

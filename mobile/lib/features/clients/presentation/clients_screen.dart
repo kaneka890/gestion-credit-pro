@@ -75,6 +75,7 @@ class ClientsScreen extends ConsumerWidget {
           switch (i) {
             case 0: context.go('/dashboard'); break;
             case 2: context.go('/contrats'); break;
+            case 3: context.go('/paiements'); break;
           }
         },
         destinations: const [
@@ -89,6 +90,10 @@ class ClientsScreen extends ConsumerWidget {
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             label: 'Contrats',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.payments_outlined),
+            label: 'Paiements',
           ),
         ],
       ),

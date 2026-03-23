@@ -125,6 +125,18 @@ class ApiClient {
     });
     return resp.data as Map<String, dynamic>;
   }
+
+  // ── Paiements ────────────────────────────────────────────────
+  Future<Map<String, dynamic>> listerPaiements({
+    int limite = 50,
+    String? operateur,
+  }) async {
+    final resp = await _dio.get('/paiements/historique', queryParameters: {
+      'limite': limite,
+      if (operateur != null) 'operateur': operateur,
+    });
+    return resp.data as Map<String, dynamic>;
+  }
 }
 
 // ── Intercepteur JWT ────────────────────────────────────────

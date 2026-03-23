@@ -75,6 +75,25 @@ def create_app(config_class=None):
     def health():
         return {"status": "ok", "version": "1.0.0-alpha", "app": "Gestion Crédit Pro"}
 
+    # ── Flutter Web App ──────────────────────────────────────
+    import os
+    from flask import send_from_directory
+
+    flutter_dir = os.path.join(os.path.dirname(app.root_path), "static_flutter")
+
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def servir_flutter(path):
+        """Sert l'application Flutter Web depuis static_flutter/."""
+        # Ne pas intercepter les routes API
+        if path.startswith("api/"):
+            from flask import abort
+            abort(404)
+        fichier = os.path.join(flutter_dir, path)
+        if path and os.path.isfile(fichier):
+            return send_from_directory(flutter_dir, path)
+        return send_from_directory(flutter_dir, "index.html")
+
     return app
 
 
