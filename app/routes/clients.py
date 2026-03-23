@@ -87,6 +87,33 @@ def detail_client(client_id):
     })
 
 
+@clients_bp.route("/<client_id>", methods=["PUT"])
+@jwt_required()
+def modifier_client(client_id):
+    """Modifier les informations d'un client."""
+    commercant_id = get_jwt_identity()
+    client = Client.query.filter_by(
+        id=client_id,
+        commercant_id=commercant_id
+    ).first()
+
+    if not client:
+        return jsonify({"erreur": "Client introuvable"}), 404
+
+    data = request.get_json()
+    champs_modifiables = [
+        "nom_complet", "telephone", "wave_numero", "orange_money_numero",
+        "mtn_momo_numero", "quartier_residence", "cni_numero",
+        "garant_nom", "garant_telephone",
+    ]
+    for champ in champs_modifiables:
+        if champ in data:
+            setattr(client, champ, data[champ])
+
+    db.session.commit()
+    return jsonify({"message": "Client mis à jour", "client": client.to_dict()})
+
+
 @clients_bp.route("/<client_id>/score/recalculer", methods=["POST"])
 @jwt_required()
 def recalculer_score(client_id):

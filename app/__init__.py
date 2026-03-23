@@ -61,12 +61,14 @@ def create_app(config_class=None):
     from app.routes.paiements import paiements_bp
     from app.routes.scores import scores_bp
     from app.routes.clients import clients_bp
+    from app.routes.rappels import rappels_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(contrats_bp, url_prefix="/api/v1/contrats")
     app.register_blueprint(paiements_bp, url_prefix="/api/v1/paiements")
     app.register_blueprint(scores_bp, url_prefix="/api/v1/scores")
     app.register_blueprint(clients_bp, url_prefix="/api/v1/clients")
+    app.register_blueprint(rappels_bp, url_prefix="/api/v1/rappels")
 
     # Health check
     @app.route("/health")
