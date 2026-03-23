@@ -47,6 +47,8 @@ class Config:
 
     MTN_MOMO_API_URL = os.getenv("MTN_MOMO_API_URL", "https://sandbox.momodeveloper.mtn.com")
     MTN_SUBSCRIPTION_KEY = os.getenv("MTN_SUBSCRIPTION_KEY", "")
+    MTN_API_USER = os.getenv("MTN_API_USER", "")
+    MTN_API_KEY = os.getenv("MTN_API_KEY", "")
 
     # WhatsApp
     WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN", "")
